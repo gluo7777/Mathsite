@@ -1,4 +1,4 @@
-package mathsite.models;
+package mathsite.viewmodels;
 
 import java.util.List;
 

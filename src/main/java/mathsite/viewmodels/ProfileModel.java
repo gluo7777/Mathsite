@@ -1,4 +1,4 @@
-package mathsite.models;
+package mathsite.viewmodels;
 
 public class ProfileModel {
 

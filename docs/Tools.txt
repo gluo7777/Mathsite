@@ -1,1 +1,14 @@
 Open Source Ideas
+
+Redis
+-- https://redis.io/topics/introduction
+
+GemFire
+-- https://pivotal.io/pivotal-gemfire
+
+Microservices
+-- http://microservices.io/
+
+Spring Session
+-- https://docs.spring.io/spring-session/docs/current/reference/html5/guides/boot.html
+
