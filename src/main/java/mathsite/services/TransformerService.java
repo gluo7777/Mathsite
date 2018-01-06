@@ -10,12 +10,18 @@ import org.springframework.stereotype.Service;
 
 import mathproblems.generator.Operation;
 import mathproblems.generator.problem.Problem;
+import mathsite.beans.ProblemType;
 import mathsite.beans.Setting;
 import mathsite.viewmodels.ProblemModel;
 import mathsite.viewmodels.SettingModel;
 
 @Service
 public class TransformerService {
+	/**
+	 * Transforms user settings into a {@link Setting}
+	 * @param model
+	 * @return
+	 */
 	public Setting settingViewToObject(SettingModel model) {
 		Setting setting = new Setting();
 		setting.setMinDigit(model.getMinDigit());
@@ -28,9 +34,24 @@ public class TransformerService {
 		for (Operation operation : Operation.getOperations()) {
 			setting.getFrequency().put(operation, model.getFrequencies()[op++]);
 		}
+		switch (model.getProblemType()) {
+		case "Number":
+			setting.setProblemType(ProblemType.NUMBER);
+			break;
+		case "Fraction":
+			setting.setProblemType(ProblemType.FRACTION);
+			break;
+		default:
+			throw new IllegalArgumentException(String.format("%s is not a valid problem type", model.getProblemType()));
+		}
 		return setting;
 	}
 
+	/**
+	 * Transforms a {@link Setting} into a view object
+	 * @param setting
+	 * @return
+	 */
 	public SettingModel settingObjectToView(Setting setting) {
 		SettingModel settingModel = new SettingModel();
 		settingModel.setMinDigit(setting.getMinDigit());
@@ -45,71 +66,81 @@ public class TransformerService {
 		for (Operation op : set) {
 			frequencies[i++] = setting.getFrequency().get(op);
 		}
+		settingModel.setFrequencies(frequencies);
+		switch (setting.getProblemType()) {
+		case NUMBER:
+			settingModel.setProblemType("Number");
+			break;
+		case FRACTION:
+			settingModel.setProblemType("Fraction");
+			break;
+		default:
+			throw new IllegalArgumentException();
+		}
 		return settingModel;
 	}
 
-	public <T> void problemObjectToView(Problem<T> problem, ProblemModel problemModel) {
-		problemModel.setStringList(generateStringList(problem));
-		problemModel.setCorrectAnswer(transformProblemAnswerObjectToString(problem.getResult()));
-	}
-
-	@SuppressWarnings("unchecked")
-	public <T> void problemViewToObject(Problem<T> problem, ProblemModel problemModel) {
-		T answer = (T) transformProblemAnswerStringToObject(problemModel.getUserAnswer(),
-				problem.getAnswer().getClass());
-		problem.setAnswer(answer);
-	}
-
+	/**
+	 * Creates a new list of view models from a list of problems
+	 * 
+	 * @param problems
+	 * @return
+	 */
 	public <T> List<ProblemModel> problemObjectToViewList(List<Problem<T>> problems) {
 		List<ProblemModel> problemModels = new LinkedList<>();
 		for (Problem<T> problem : problems) {
 			ProblemModel problemModel = new ProblemModel();
 			problemModel.setStringList(generateStringList(problem));
+			problemModel.setCorrectAnswer(problem.getResult() != null ? problem.getResult().toString() : "");
+			problemModel.setUserAnswer(problem.getAnswer() != null ? problem.getAnswer().toString() : "");
+			problemModels.add(problemModel);
 		}
 		return problemModels;
 	}
 
-	public <T> void problemResultObjectToViewList(List<Problem<T>> problems, List<ProblemModel> problemModels) {
-		for (int i = 0; i < problems.size(); i++) {
-			problemModels.get(i).setCorrectAnswer(transformProblemAnswerObjectToString(problems.get(i).getResult()));
-		}
+	/**
+	 * Store correct answer into a view
+	 * @param problem
+	 * @param problemModel
+	 */
+	public <T> void problemObjectToViewResult(Problem<T> problem, ProblemModel problemModel) {
+		problemModel.setCorrectAnswer(transformProblemAnswerObjectToString(problem.getResult()));
 	}
-
-	@SuppressWarnings("unchecked")
-	public <T> void problemAnswerViewToObjectList(List<ProblemModel> problemModels, List<Problem<T>> problems) {
-		for (int i = 0; i < problems.size(); i++) {
-			Problem<T> p = problems.get(i);
-			T answer = (T) transformProblemAnswerStringToObject(problemModels.get(i).getUserAnswer(),
-					p.getAnswer().getClass());
-			p.setAnswer(answer);
-		}
+	
+	/**
+	 * Transform user's answer to a {@link BigDecimal} answer
+	 * @param problem
+	 * @param problemModel
+	 */
+	public void problemViewToObjectAnswerForNumber(Problem<BigDecimal> problem, ProblemModel problemModel) {
+		problem.setAnswer(new BigDecimal(problemModel.getUserAnswer()));
+	}
+	
+	/**
+	 * Transform user's answer to a {@link Fraction} answer
+	 * @param problem
+	 * @param problemModel
+	 */
+	public void problemViewToObjectAnswerForFraction(Problem<Fraction> problem, ProblemModel problemModel) {
+		String str[] = problemModel.getUserAnswer().split("/");
+		int numerator = Integer.parseInt(str[0]);
+		int denominator = str.length > 1 ? Integer.parseInt(str[1]) : 1;
+		problem.setAnswer(new Fraction(numerator, denominator));
 	}
 
 	private <T> String transformProblemAnswerObjectToString(T obj) {
 		if (obj instanceof BigDecimal) {
 			return ((BigDecimal) obj).toString();
 		} else if (obj instanceof Fraction) {
-			return ((Fraction) obj).toString();
-		}
-		return null;
-	}
-
-	private <T> T transformProblemAnswerStringToObject(String ans, Class<T> type) {
-		if (type.equals(BigDecimal.class)) {
-			return type.cast(new BigDecimal(ans));
-		} else if (type.equals(Fraction.class)) {
-			String str[] = ans.split("/");
-			int numerator = Integer.parseInt(str[0]);
-			int denominator = str.length > 1 ? Integer.parseInt(str[1]) : 1;
-			return type.cast(new Fraction(numerator, denominator));
+			return ((Fraction) obj).toString().replaceAll(" ", "");
 		}
 		return null;
 	}
 
 	private <T> List<String> generateStringList(Problem<T> problem) {
 		List<String> list = new LinkedList<>();
-		list.add(problem.getOperands()[1].toString());
-		for (int i = 0; i < problem.getOperands().length; i++) {
+		list.add(problem.getOperands()[0].toString());
+		for (int i = 0; i < problem.getOperations().length; i++) {
 			list.add(problem.getOperations()[i].getValue());
 			list.add(problem.getOperands()[i + 1].toString());
 		}
