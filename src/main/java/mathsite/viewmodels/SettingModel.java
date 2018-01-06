@@ -8,6 +8,7 @@ public class SettingModel {
 	boolean mixMode;
 	int problemCount;
 	int frequencies[] = new int[4];
+	String problemType;
 
 	public final int getMinDigit() {
 		return minDigit;
@@ -63,6 +64,14 @@ public class SettingModel {
 
 	public final void setFrequencies(int[] frequencies) {
 		this.frequencies = frequencies;
+	}
+
+	public final String getProblemType() {
+		return problemType;
+	}
+
+	public final void setProblemType(String problemType) {
+		this.problemType = problemType;
 	}
 
 }

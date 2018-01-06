@@ -15,6 +15,7 @@ public class Setting {
 	int maxOperands;
 	boolean mixMode;
 	int problemCount;
+	ProblemType problemType;
 	// will be a three column table in database
 	Map<Operation, Integer> frequency = new LinkedHashMap<>();
 
@@ -80,6 +81,14 @@ public class Setting {
 
 	public final void setFrequency(Map<Operation, Integer> frequency) {
 		this.frequency = frequency;
+	}
+
+	public final ProblemType getProblemType() {
+		return problemType;
+	}
+
+	public final void setProblemType(ProblemType type) {
+		this.problemType = type;
 	}
 
 }
