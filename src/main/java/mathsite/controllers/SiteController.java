@@ -50,6 +50,7 @@ public class SiteController {
 		if (setting == null) {
 			setting = transformerService.settingViewToObject((SettingModel) model.asMap().get(propertyService.getSettingModelName()));
 			setting.setCookieId(UUID.randomUUID().toString());
+			response.addCookie(new Cookie(propertyService.getCookieName(), setting.getCookieId()));
 		}
 		session.setSetting(setting);
 		return "index";
@@ -59,9 +60,12 @@ public class SiteController {
 	public String generateListOfProblems(Model model, @PathVariable("type") String type) {
 		List<ProblemModel> problems = null;
 		if(type.equals(propertyService.getNumberTypeName())) {
-			model.asMap().put(propertyService.getProblemModelName(), problems);
+			problems = transformerService.problemObjectToViewList(generatorService.getSimpleProblemSet(session.getSetting()));
+		} else if(type.equals(propertyService.getFractionTypeName())) {
+			problems = transformerService.problemObjectToViewList(generatorService.getFractionProblemSet(session.getSetting()));
 		}
-		return null;
+		model.asMap().put(propertyService.getProblemModelName(), problems);
+		return "problems";
 	}
 	
 	

@@ -15,14 +15,11 @@ import mathproblems.generator.builders.SimpleProblemBuilder;
 import mathproblems.generator.calculator.FractionCalculator;
 import mathproblems.generator.calculator.SimpleCalculator;
 import mathproblems.generator.problem.Problem;
-import mathsite.beans.Session;
 import mathsite.beans.Setting;
+import mathsite.viewmodels.ProblemModel;
 
 @Service
 public class GeneratorService {
-	@Autowired
-	private Session session;
-
 	@Autowired
 	private SimpleProblemBuilder simpleProblemBuilder;
 
@@ -40,24 +37,21 @@ public class GeneratorService {
 
 	}
 
-	public List<Problem<BigDecimal>> getSimpleProblemSet() {
-		Setting setting = session.getSetting();
+	public List<Problem<BigDecimal>> getSimpleProblemSet(Setting setting) {
 		commonConfig(simpleProblemBuilder, setting);
-		return simpleProblemBuilder.setNumberOfDigits(setting.getMinDigit(), setting.getMaxDigit())
-				.buildProblemSet();
+		return simpleProblemBuilder.setNumberOfDigits(setting.getMinDigit(), setting.getMaxDigit()).buildProblemSet();
 	}
 
-	public List<Problem<Fraction>> getFractionProblemSet() {
-		Setting setting = session.getSetting();
+	public List<Problem<Fraction>> getFractionProblemSet(Setting setting) {
 		commonConfig(fractionProblemBuilder, setting);
 		return fractionProblemBuilder.buildProblemSet();
 	}
-	
-	public void solveSimpleProblems(List<Problem<BigDecimal>> problems) {
+
+	public void solveSimpleProblems(List<Problem<BigDecimal>> problems, Setting setting) {
 		simpleCalculator.calculate(problems);
 	}
-	
-	public void solveFractionProblems(List<Problem<Fraction>> problems) {
+
+	public void solveFractionProblems(List<Problem<Fraction>> problems, Setting setting) {
 		fractionCalculator.calculate(problems);
 	}
 
@@ -66,5 +60,17 @@ public class GeneratorService {
 				.setNumberOfProblems(setting.getProblemCount()).setMixedMode(setting.isMixMode())
 				.setSolveProblems(false).setFrequencies(setting.getFrequency());
 	}
+
+	public <T> void compareAndSolve(List<ProblemModel> problemModels, List<Problem<T>> problems, Setting setting) {
+		if (problemModels.size() != problems.size())
+			throw new RuntimeException("Cannot solve problems.");
+		for (int i = 0; i < problems.size(); i++) {
+			ProblemModel model = problemModels.get(i);
+			Problem<T> problem = problems.get(i);
+			
+		}
+	}
+	
+	
 
 }
