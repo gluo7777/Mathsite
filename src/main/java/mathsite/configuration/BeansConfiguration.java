@@ -33,7 +33,8 @@ public class BeansConfiguration {
 		return new FractionCalculator();
 	}
 	
-	public final Session getSession() {
+	@Bean
+	public Session getSession() {
 		return new Session();
 	}
 }
