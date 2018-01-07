@@ -16,7 +16,6 @@ import mathproblems.generator.calculator.FractionCalculator;
 import mathproblems.generator.calculator.SimpleCalculator;
 import mathproblems.generator.problem.Problem;
 import mathsite.beans.Setting;
-import mathsite.viewmodels.ProblemModel;
 
 @Service
 public class GeneratorService {
@@ -46,13 +45,13 @@ public class GeneratorService {
 		commonConfig(fractionProblemBuilder, setting);
 		return fractionProblemBuilder.buildProblemSet();
 	}
-
-	public void solveSimpleProblems(List<Problem<BigDecimal>> problems, Setting setting) {
-		simpleCalculator.calculate(problems);
+	
+	public void solveNumberProblem(Problem<BigDecimal> problem) {
+		simpleCalculator.calculate(problem);
 	}
 
-	public void solveFractionProblems(List<Problem<Fraction>> problems, Setting setting) {
-		fractionCalculator.calculate(problems);
+	public void solveFractionProblem(Problem<Fraction> problem) {
+		fractionCalculator.calculate(problem);
 	}
 
 	private void commonConfig(CommonProblemBuilder<?, ?> commonProblemBuilder, Setting setting) {
@@ -60,17 +59,5 @@ public class GeneratorService {
 				.setNumberOfProblems(setting.getProblemCount()).setMixedMode(setting.isMixMode())
 				.setSolveProblems(false).setFrequencies(setting.getFrequency());
 	}
-
-	public <T> void compareAndSolve(List<ProblemModel> problemModels, List<Problem<T>> problems, Setting setting) {
-		if (problemModels.size() != problems.size())
-			throw new RuntimeException("Cannot solve problems.");
-		for (int i = 0; i < problems.size(); i++) {
-			ProblemModel model = problemModels.get(i);
-			Problem<T> problem = problems.get(i);
-			
-		}
-	}
 	
-	
-
 }
